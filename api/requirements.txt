@@ -1,0 +1,4 @@
+# LindaAI API — pinned to compatible ranges so deploys stay reproducible
+# without breaking on a future major release.
+fastapi>=0.115,<0.116
+uvicorn[standard]>=0.34,<0.35

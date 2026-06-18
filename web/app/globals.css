@@ -1,0 +1,129 @@
+/* LindaAI design tokens — derived directly from docs/04_UIUX_Brief.md */
+:root {
+  --navy-900: #0A2540;
+  --navy-700: #163B5C;
+  --green-600: #1B7F5C;
+  --green-100: #E6F4EE;
+  --white: #FFFFFF;
+  --mist-50: #F6F8FA;
+  --border: #E2E8F0;
+  --slate: #475569;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  color: var(--navy-900);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* A quiet wash at the top so the page feels grounded, not empty. */
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(1100px 420px at 50% -180px, var(--green-100), transparent 70%),
+    var(--white);
+}
+
+a { color: var(--green-600); }
+
+/* ---------- Landing (Week 1 / Day 1) ---------- */
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.25rem 3rem;
+}
+.shell { width: 100%; max-width: 580px; }
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  color: var(--navy-900);
+}
+.brand svg { display: block; }
+
+.eyebrow {
+  margin-top: 2.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green-600);
+}
+
+h1 {
+  margin: 0.85rem 0 0;
+  font-size: clamp(1.9rem, 6vw, 2.6rem);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: var(--navy-900);
+  font-weight: 700;
+}
+.subhead {
+  margin: 0.9rem 0 0;
+  font-size: 1.05rem;
+  color: var(--slate);
+}
+.subhead--sw { color: var(--navy-700); font-style: italic; }
+
+/* status pill */
+.status {
+  margin-top: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--white);
+  font-size: 0.88rem;
+  color: var(--navy-700);
+}
+.dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--slate);
+  flex: none;
+}
+.dot--ok    { background: var(--green-600); box-shadow: 0 0 0 0 rgba(27,127,92,0.45); animation: pulse 2.2s infinite; }
+.dot--wake  { background: #D97706; }
+.dot--down  { background: #B42318; }
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(27,127,92,0.45); }
+  70%  { box-shadow: 0 0 0 7px rgba(27,127,92,0); }
+  100% { box-shadow: 0 0 0 0 rgba(27,127,92,0); }
+}
+
+.foot {
+  margin-top: 2.75rem;
+  font-size: 0.8rem;
+  color: var(--slate);
+}
+.foot code {
+  background: var(--mist-50);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.78rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
