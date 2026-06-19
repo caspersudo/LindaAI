@@ -1,0 +1,24 @@
+// Handles the link in the "confirm your email" message.
+// Supabase's default email points here with a token_hash; we verify it
+// and then send the user to their dashboard.
+import { type EmailOtpType } from "@supabase/supabase-js";
+import { type NextRequest } from "next/server";
+import { redirect } from "next/navigation";
+import { createClient } from "@/app/lib/supabase/server";
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const token_hash = searchParams.get("token_hash");
+  const type = searchParams.get("type") as EmailOtpType | null;
+  const next = searchParams.get("next") ?? "/dashboard";
+
+  if (token_hash && type) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash });
+    if (!error) {
+      redirect(next);
+    }
+  }
+
+  redirect("/login?error=confirm");
+}

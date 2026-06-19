@@ -127,3 +127,67 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Buttons (shared) ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  font-size: 0.95rem; font-weight: 600; padding: 0.7rem 1.15rem;
+  border-radius: 10px; border: 1px solid transparent; cursor: pointer;
+  text-decoration: none; transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+.btn:disabled { opacity: 0.6; cursor: default; }
+.btn--primary { background: var(--green-600); color: #fff; }
+.btn--primary:hover:not(:disabled) { background: #166848; }
+.btn--ghost { background: #fff; color: var(--navy-700); border-color: var(--border); }
+.btn--ghost:hover:not(:disabled) { background: var(--mist-50); }
+.btn--sm { padding: 0.45rem 0.8rem; font-size: 0.85rem; }
+
+/* ---------- Auth pages ---------- */
+.auth-wrap { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+.auth-card { width: 100%; max-width: 400px; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 2rem 1.75rem; text-align: center; }
+.auth-brand { font-weight: 700; color: var(--green-600); margin: 0; }
+.auth-title { font-size: 1.5rem; margin: 0.6rem 0 0.25rem; color: var(--navy-900); }
+.auth-sub { color: var(--slate); margin: 0 0 1.5rem; font-size: 0.95rem; }
+.auth-foot { margin-top: 1.25rem; font-size: 0.9rem; color: var(--slate); }
+
+.field { margin-bottom: 1rem; text-align: left; }
+.label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--navy-700); margin-bottom: 0.35rem; }
+.input { width: 100%; padding: 0.7rem 0.85rem; font-size: 0.95rem; border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--navy-900); }
+.input:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px var(--green-100); }
+.auth-card .btn--primary { width: 100%; margin-top: 0.25rem; }
+
+.msg { font-size: 0.88rem; margin: 0 0 0.85rem; text-align: left; }
+.msg--error { color: #B42318; }
+
+/* ---------- Dashboard ---------- */
+.nav { border-bottom: 1px solid var(--border); background: #fff; }
+.nav-inner { max-width: 760px; margin: 0 auto; padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 700; color: var(--navy-900); }
+
+.dash { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+.dash-title { font-size: 1.6rem; margin: 0; color: var(--navy-900); }
+.dash-sub { color: var(--slate); margin: 0.35rem 0 1.75rem; }
+.dash-h2 { font-size: 1.05rem; color: var(--navy-700); margin: 2rem 0 1rem; }
+
+.add-card { background: var(--mist-50); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; text-align: left; }
+.add-row { display: flex; gap: 0.6rem; margin-top: 0.35rem; }
+.add-row .input { flex: 1; }
+@media (max-width: 480px) { .add-row { flex-direction: column; } }
+
+.empty { border: 1px dashed var(--border); border-radius: 14px; padding: 2rem 1.25rem; text-align: center; }
+.empty-title { font-weight: 600; color: var(--navy-700); margin: 0; }
+.empty-sub { color: var(--slate); margin: 0.3rem 0 0; font-size: 0.9rem; }
+
+.domain-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.domain-card { border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.15rem; background: #fff; }
+.domain-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.domain-host { font-weight: 600; color: var(--navy-900); word-break: break-all; }
+.domain-note { font-size: 0.85rem; color: var(--slate); margin: 0.6rem 0 0; }
+.token { display: block; margin-top: 0.5rem; font-family: ui-monospace, monospace; font-size: 0.8rem; background: var(--mist-50); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.6rem; word-break: break-all; color: var(--navy-700); }
+
+.badge { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.25rem 0.6rem; border-radius: 999px; white-space: nowrap; }
+.badge--pending { background: #FEF3C7; color: #92590B; }
+.badge--verified { background: var(--green-100); color: var(--green-600); }
+.badge--revoked { background: #FEE2E2; color: #B42318; }
+
+.hero-actions { margin-top: 1.75rem; display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; }
