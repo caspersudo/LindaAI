@@ -1,24 +1,20 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/app/lib/supabase/server";
 import AddDomainForm from "./add-domain-form";
+import DomainCard from "./domain-card";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  // 1. Who is logged in? If nobody, send them to the login page.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // 2. Load this person's business profile.
   const { data: profile } = await supabase
     .from("users")
     .select("org_id, full_name, email")
     .eq("id", user.id)
     .single();
 
-  // 3. Load the domains belonging to their business (RLS keeps it to theirs).
   const { data: domains } = await supabase
     .from("verified_domains")
     .select("id, hostname, status, verify_token, created_at")
@@ -61,19 +57,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="domain-list">
             {domains.map((d) => (
-              <div className="domain-card" key={d.id}>
-                <div className="domain-head">
-                  <span className="domain-host">{d.hostname}</span>
-                  <span className={`badge badge--${d.status}`}>{d.status}</span>
-                </div>
-                {d.status === "pending" && (
-                  <p className="domain-note">
-                    Next step (coming in Week 2): add this TXT record at your
-                    domain registrar to prove you own it.
-                    <code className="token">{d.verify_token}</code>
-                  </p>
-                )}
-              </div>
+              <DomainCard key={d.id} domain={d} />
             ))}
           </div>
         )}

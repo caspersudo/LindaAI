@@ -1,4 +1,5 @@
 # LindaAI API — pinned to compatible ranges so deploys stay reproducible
-# without breaking on a future major release.
 fastapi>=0.115,<0.116
 uvicorn[standard]>=0.34,<0.35
+httpx>=0.28,<0.29
+dnspython>=2.7,<3.0
