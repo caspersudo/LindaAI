@@ -56,6 +56,7 @@ export default function DomainCard({ domain }: { domain: Domain }) {
   const [scan, setScan] = useState<Scan | null>(null);
   const [scanning, setScanning] = useState(false);
   const [activeScanId, setActiveScanId] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<"en" | "sw" | null>(null);
 
   // Poll while a scan is queued or running
   useEffect(() => {
@@ -119,6 +120,28 @@ export default function DomainCard({ domain }: { domain: Domain }) {
     navigator.clipboard.writeText(domain.verify_token);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function downloadReport(lang: "en" | "sw") {
+    if (!scan?.id) return;
+    setDownloading(lang);
+    try {
+      const token = await getToken();
+      const r = await fetch(`${API_URL}/scans/${scan.id}/report?lang=${lang}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) throw new Error(await r.text());
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `lindaai-${domain.hostname}-${lang}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silent — user will see no download
+    }
+    setDownloading(null);
   }
 
   const counts = scan?.raw_findings?.reduce(

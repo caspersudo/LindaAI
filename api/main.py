@@ -7,6 +7,7 @@ Routes:
   GET  /scans/{scan_id}             → poll status + findings
 """
 import asyncio
+import io
 import os
 import ssl
 import socket
@@ -16,7 +17,10 @@ import dns.asyncresolver
 import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+
+from report import build_llm_input, call_llm, generate_pdf
 
 APP_VERSION = "0.2.0"
 UA = "LindaAI-Scanner/1.0"
@@ -207,6 +211,58 @@ async def get_scan(scan_id: str, user: dict = Depends(current_user)):
     if not rows:
         raise HTTPException(404, "Scan not found")
     return rows[0]
+
+
+@app.get("/scans/{scan_id}/report")
+async def download_report(
+    scan_id: str,
+    lang: str = "en",
+    user: dict = Depends(current_user),
+):
+    if lang not in ("en", "sw"):
+        raise HTTPException(400, "lang must be 'en' or 'sw'")
+
+    org_id = await get_org_id(user)
+    rows = await db_get(
+        "scans",
+        {"id": f"eq.{scan_id}", "org_id": f"eq.{org_id}", "select": "*"},
+    )
+    if not rows:
+        raise HTTPException(404, "Scan not found")
+    scan = rows[0]
+
+    if scan["status"] != "complete":
+        raise HTTPException(409, "Scan is not complete yet")
+
+    findings = scan.get("raw_findings") or []
+
+    domain_rows = await db_get(
+        "verified_domains",
+        {"id": f"eq.{scan['domain_id']}", "select": "hostname"},
+    )
+    hostname = domain_rows[0]["hostname"] if domain_rows else "unknown"
+
+    llm_input = build_llm_input(findings)
+    summary, prompt_tokens, completion_tokens = await call_llm(llm_input, lang, findings)
+
+    # Cost tracking: GPT-4o-mini @ $0.15/M in, $0.60/M out → KES at ~130/$
+    cost_kes = ((prompt_tokens * 0.00000015) + (completion_tokens * 0.0000006)) * 130
+
+    await db_patch("scans", {"id": scan_id}, {
+        "llm_prompt_tokens": prompt_tokens,
+        "llm_completion_tokens": completion_tokens,
+        "cost_kes": round(cost_kes, 4),
+        "overall_risk": summary.overall_risk,
+    })
+
+    pdf_bytes = generate_pdf(hostname, findings, summary, lang)
+    filename = f"lindaai-{hostname}-{lang}.pdf"
+
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 # ─── Scanner ──────────────────────────────────────────────────────────────────

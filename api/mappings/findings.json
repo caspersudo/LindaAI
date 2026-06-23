@@ -1,0 +1,182 @@
+{
+  "missing-strict-transport-security": {
+    "severity": "medium",
+    "title_en": "Missing HTTPS Enforcement Header (HSTS)",
+    "impact_en": "Visitors can be silently switched to an insecure connection by an attacker on the same Wi-Fi — they would not know this is happening, and anything they type could be read.",
+    "fix_en": "Ask your web host or developer to add: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+    "title_sw": "Kichwa cha Kulazimisha HTTPS Hakipo (HSTS)",
+    "impact_sw": "Wateja wanaweza kuunganishwa kwa njia isiyo salama bila kujua — mshambuliaji kwenye mtandao huo huo anaweza kusoma kila kitu wanachoandika.",
+    "fix_sw": "Mwombe msanidi wa tovuti yako kuongeza: Strict-Transport-Security: max-age=31536000; includeSubDomains"
+  },
+  "missing-content-security-policy": {
+    "severity": "medium",
+    "title_en": "No Content Security Policy",
+    "impact_en": "Without this protection, if an attacker ever injects code into your site, it can run freely and steal customer data or redirect visitors to a fake page.",
+    "fix_en": "Add a Content-Security-Policy header. Your developer can start with a basic policy and tighten it over time.",
+    "title_sw": "Sera ya Usalama wa Maudhui Haipo",
+    "impact_sw": "Bila ulinzi huu, ikiwa mshambuliaji ataweza kuingiza msimbo kwenye tovuti yako, unaweza kuendesha bila vizuizi na kuiba data za wateja.",
+    "fix_sw": "Ongeza kichwa cha Content-Security-Policy. Msanidi wako anaweza kuanza na sera ya msingi na kuiimarisha baadaye."
+  },
+  "missing-x-frame-options": {
+    "severity": "medium",
+    "title_en": "Site Can Be Embedded in Fake Pages (Clickjacking Risk)",
+    "impact_en": "Your site can be hidden inside a fake page to trick users into clicking things they did not mean to — a common trick for stealing login credentials.",
+    "fix_en": "Add: X-Frame-Options: DENY (or SAMEORIGIN if you embed your own pages in iframes)",
+    "title_sw": "Tovuti Inaweza Kufichwa Ndani ya Ukurasa Bandia",
+    "impact_sw": "Tovuti yako inaweza kufichwa ndani ya ukurasa bandia ili kuwadanganya watumiaji wabofye vitu bila kukusudia — mbinu ya kawaida ya kuiba nywila.",
+    "fix_sw": "Ongeza: X-Frame-Options: DENY (au SAMEORIGIN ikiwa unaingiza kurasa zako mwenyewe)"
+  },
+  "missing-x-content-type-options": {
+    "severity": "low",
+    "title_en": "Browser May Misread File Types",
+    "impact_en": "Browsers might try to execute uploaded files as code if they guess the file type incorrectly. A low risk for most sites, but simple to fix.",
+    "fix_en": "Add: X-Content-Type-Options: nosniff",
+    "title_sw": "Kivinjari Kinaweza Kusoma Faili Vibaya",
+    "impact_sw": "Vivinjari vinaweza kutekeleza faili zilizopakiwa kama msimbo ikiwa vitakisia aina ya faili vibaya. Hatari ndogo, lakini rahisi kurekebisha.",
+    "fix_sw": "Ongeza: X-Content-Type-Options: nosniff"
+  },
+  "missing-referrer-policy": {
+    "severity": "low",
+    "title_en": "Website Address Leaks to Other Sites",
+    "impact_en": "When a visitor clicks a link to another site, your full web address is shared with that site — including any sensitive information in the URL.",
+    "fix_en": "Add: Referrer-Policy: strict-origin-when-cross-origin",
+    "title_sw": "Anwani ya Tovuti Inaweza Kushirikiwa na Tovuti Nyingine",
+    "impact_sw": "Mtumiaji akibofya kiungo kwenda tovuti nyingine, anwani yako kamili inashirikiwa na tovuti hiyo, ikiwemo taarifa nyeti kwenye URL.",
+    "fix_sw": "Ongeza: Referrer-Policy: strict-origin-when-cross-origin"
+  },
+  "missing-permissions-policy": {
+    "severity": "low",
+    "title_en": "Browser Permissions Not Restricted",
+    "impact_en": "Your site does not limit which browser features (camera, microphone, location) scripts can access. Low risk for most business sites but good practice.",
+    "fix_en": "Add: Permissions-Policy: camera=(), microphone=(), geolocation=()",
+    "title_sw": "Ruhusa za Kivinjari Hazijazuiwa",
+    "impact_sw": "Tovuti yako haizuii ni vipengele vipi vya kivinjari ambavyo hati zinaweza kufikia. Hatari ndogo kwa tovuti nyingi za biashara lakini ni mazoea mazuri.",
+    "fix_sw": "Ongeza: Permissions-Policy: camera=(), microphone=(), geolocation=()"
+  },
+  "server-version-disclosed": {
+    "severity": "low",
+    "title_en": "Software Version Exposed in Server Banner",
+    "impact_en": "Your website tells attackers exactly which software and version you run, making it easier to find a known exploit that targets that specific version.",
+    "fix_en": "Ask your host to hide the server version. In nginx: server_tokens off;  In Apache: ServerTokens Prod",
+    "title_sw": "Toleo la Programu Limedhihirishwa kwenye Bendera ya Seva",
+    "impact_sw": "Tovuti yako inawaambia washambuliaji toleo halisi la programu unayotumia, kuwarahisishia kupata udhaifu unaofanana.",
+    "fix_sw": "Mwombe mwenyeji wako kuficha toleo la seva. Katika nginx: server_tokens off;  Katika Apache: ServerTokens Prod"
+  },
+  "weak-cookie-flags": {
+    "severity": "high",
+    "title_en": "Login Sessions Can Be Stolen",
+    "impact_en": "Cookies that track logged-in customers lack security flags. An attacker on the same network could steal a customer session and act as that person.",
+    "fix_en": "Set the Secure and HttpOnly flags on all session cookies. Your developer can add these in one line of code.",
+    "title_sw": "Vikao vya Kuingia Vinaweza Kuibiwa",
+    "impact_sw": "Vidakuzi vinavyofuatilia wateja walioingia havina alama za usalama. Mshambuliaji kwenye mtandao huo huo anaweza kuiba kikao na kujifanya kuwa mteja huyo.",
+    "fix_sw": "Weka alama za Secure na HttpOnly kwenye vidakuzi vyote vya vikao. Msanidi wako anaweza kufanya hivi kwa mstari mmoja wa msimbo."
+  },
+  "no-https-redirect": {
+    "severity": "medium",
+    "title_en": "Site Does Not Force Secure Connection",
+    "impact_en": "Some visitors land on the unencrypted version of your site without realising it. Everything they type is visible to anyone monitoring the network.",
+    "fix_en": "Set up a 301 redirect from http:// to https:// in your web server config or hosting control panel.",
+    "title_sw": "Tovuti Hailazimishi Muunganisho Salama",
+    "impact_sw": "Baadhi ya wageni huingia kwenye toleo lisilo na usimbaji wa tovuti yako bila kujua. Kila kitu wanachoandika kinaonekana kwenye mtandao.",
+    "fix_sw": "Weka upelekaji wa 301 kutoka http:// kwenda https:// kwenye seva yako ya tovuti au paneli ya udhibiti wa mwenyeji."
+  },
+  "self-signed-cert": {
+    "severity": "high",
+    "title_en": "Website Uses an Untrusted Security Certificate",
+    "impact_en": "Browsers will show a red Not Secure warning to every visitor. Most people leave immediately, costing you customers and trust.",
+    "fix_en": "Replace the self-signed certificate with a free Let's Encrypt certificate, available from your hosting provider or via certbot.eff.org.",
+    "title_sw": "Tovuti Inatumia Cheti cha Usalama Kisichoaminika",
+    "impact_sw": "Vivinjari vitaonyesha onyo jekundu kwa kila mgeni. Watu wengi wataondoka mara moja, na utapoteza wateja na imani.",
+    "fix_sw": "Badilisha cheti kilichojisainiwa na cheti cha Let's Encrypt cha bure, kinachopatikana kutoka kwa mwenyeji wako au kupitia certbot.eff.org."
+  },
+  "cert-validation-failed": {
+    "severity": "high",
+    "title_en": "Security Certificate Has an Error",
+    "impact_en": "Browsers warn visitors that your site may not be who it claims to be. This seriously damages trust and may block access for some customers entirely.",
+    "fix_en": "Check that your certificate is issued for the correct domain name and has not expired. Contact your hosting provider to renew or reissue it.",
+    "title_sw": "Cheti cha Usalama Kina Hitilafu",
+    "impact_sw": "Vivinjari vinawaarifu wageni kwamba tovuti yako inaweza isiwe ni wewe unayedai. Hii inaathiri sana imani na inaweza kuzuia ufikiaji kabisa.",
+    "fix_sw": "Hakikisha cheti chako kimetolewa kwa jina sahihi la kikoa na halijakwisha muda. Wasiliana na mtoa huduma wako wa mwenyeji."
+  },
+  "no-tls": {
+    "severity": "critical",
+    "title_en": "Website Has No Encryption At All",
+    "impact_en": "Every password, payment detail, and message sent through your site is visible to anyone on the same network. This is the most serious risk for your customers.",
+    "fix_en": "Install an SSL/TLS certificate immediately. Your hosting provider can usually do this for free using Let's Encrypt — call them today.",
+    "title_sw": "Tovuti Haina Usimbaji Kabisa",
+    "impact_sw": "Kila nywila, maelezo ya malipo, na ujumbe unaotumwa kupitia tovuti yako unaonekana kwa mtu yeyote kwenye mtandao huo. Hii ndiyo hatari kubwa zaidi inayowezekana.",
+    "fix_sw": "Sakinisha cheti cha SSL/TLS mara moja. Mtoa huduma wako wa mwenyeji anaweza kufanya hivi bure kwa kutumia Let's Encrypt."
+  },
+  "cert-expired": {
+    "severity": "critical",
+    "title_en": "Security Certificate Has Expired",
+    "impact_en": "Browsers are showing a full red-screen warning to every visitor right now. Your site is effectively unreachable for most customers.",
+    "fix_en": "Renew your SSL certificate immediately. Contact your hosting provider — most can renew it for free within minutes.",
+    "title_sw": "Cheti cha Usalama Kimekwisha Muda",
+    "impact_sw": "Vivinjari vinaonyesha onyo jekundu la skrini nzima kwa kila mgeni sasa hivi. Tovuti yako kwa kweli haifikiwi kwa wateja wengi.",
+    "fix_sw": "Funga upya cheti chako cha SSL mara moja. Wasiliana na mtoa huduma wako wa mwenyeji."
+  },
+  "cert-expiring-soon": {
+    "severity": "high",
+    "title_en": "Security Certificate Expiring Within 2 Weeks",
+    "impact_en": "Soon browsers will show customers a red Not Secure warning and many will leave, costing you sales and trust.",
+    "fix_en": "Renew your SSL certificate now, before it expires. Most hosting providers do this automatically or for free on request.",
+    "title_sw": "Cheti cha Usalama Kitakwisha Muda Ndani ya Wiki 2",
+    "impact_sw": "Hivi karibuni vivinjari vitaonyesha onyo jekundu kwa wateja na wengi wataondoka, na utapoteza mauzo na imani.",
+    "fix_sw": "Funga upya cheti chako cha SSL sasa, kabla ya kwisha muda. Watoa huduma wengi wa mwenyeji hufanya hivi kiotomatiki au bure ukiomba."
+  },
+  "cert-expiring": {
+    "severity": "medium",
+    "title_en": "Security Certificate Expiring Within 30 Days",
+    "impact_en": "Your certificate will expire soon. If not renewed in time, browsers will block visitors with a security warning.",
+    "fix_en": "Schedule a certificate renewal with your hosting provider. Set a recurring reminder so this does not happen again.",
+    "title_sw": "Cheti cha Usalama Kitakwisha Muda Ndani ya Siku 30",
+    "impact_sw": "Cheti chako kitakwisha muda hivi karibuni. Ikiwa hakitafunguliwa upya, vivinjari vitazuia ufikiaji wa tovuti yako.",
+    "fix_sw": "Panga ufunguzi upya wa cheti na mtoa huduma wako wa mwenyeji. Weka ukumbusho ili hii isitokee tena."
+  },
+  "outdated-tls-version": {
+    "severity": "medium",
+    "title_en": "Using Outdated Encryption Standard",
+    "impact_en": "Your site accepts connections using an old version of the encryption protocol with known weaknesses that attackers can exploit.",
+    "fix_en": "Disable TLS 1.0 and TLS 1.1 on your web server and enable TLS 1.2 and 1.3 only. Ask your hosting provider to make this change.",
+    "title_sw": "Inatumia Kiwango cha Usimbaji Kilichopitwa na Wakati",
+    "impact_sw": "Tovuti yako inakubali muunganisho kwa kutumia toleo la zamani la itifaki ya usimbaji ambalo lina udhaifu unaojulikana.",
+    "fix_sw": "Lemaza TLS 1.0 na 1.1 kwenye seva yako na uwashe TLS 1.2 na 1.3 peke yake. Mwombe mtoa huduma wako wa mwenyeji kufanya hivi."
+  },
+  "no-a-record": {
+    "severity": "medium",
+    "title_en": "Domain Has No Website DNS Record",
+    "impact_en": "Your domain name does not point to any web server. The site may be unreachable for some visitors.",
+    "fix_en": "Add an A record in your domain's DNS settings pointing to your web server's IP address.",
+    "title_sw": "Kikoa Hana Rekodi ya DNS ya Tovuti",
+    "impact_sw": "Jina lako la kikoa haliangazi seva yoyote ya tovuti. Tovuti inaweza kuwa haifikiwi kwa baadhi ya wageni.",
+    "fix_sw": "Ongeza rekodi A kwenye mipangilio ya DNS ya kikoa chako inayoelekeza kwa anwani ya IP ya seva yako ya tovuti."
+  },
+  "missing-spf": {
+    "severity": "high",
+    "title_en": "Email Can Be Sent From Your Domain by Anyone",
+    "impact_en": "Anyone can send emails that appear to come from your business — a common trick used for fake invoices and M-Pesa fraud targeting your customers.",
+    "fix_en": "Add an SPF TXT record to your DNS. Your email provider will give you the exact string. Example: v=spf1 include:mail.yourprovider.com ~all",
+    "title_sw": "Barua Pepe Inaweza Kutumwa kwa Kutumia Jina Lako na Mtu Yeyote",
+    "impact_sw": "Mtu yeyote anaweza kutuma barua pepe inayoonekana kana kwamba ni yako — mbinu ya kawaida ya ankara za uongo na ulaghai wa M-Pesa kwa wateja wako.",
+    "fix_sw": "Ongeza rekodi ya SPF TXT kwenye DNS yako. Mtoa huduma wako wa barua pepe atakupa mfuatano sahihi. Mfano: v=spf1 include:mail.mtoa-wako.com ~all"
+  },
+  "missing-dmarc": {
+    "severity": "high",
+    "title_en": "No Protection Against Email Impersonation",
+    "impact_en": "Without DMARC, fraudsters can send emails pretending to be you and email providers cannot automatically detect or block them.",
+    "fix_en": "Add a DMARC TXT record at _dmarc.yourdomain.com with value: v=DMARC1; p=quarantine; rua=mailto:you@yourdomain.com",
+    "title_sw": "Hakuna Ulinzi Dhidi ya Udanganyifu wa Barua Pepe",
+    "impact_sw": "Bila DMARC, walaghai wanaweza kutuma barua pepe wakijifanya kuwa wewe, na watoa huduma wa barua pepe hawawezi kuzigundua au kuzizuia kiotomatiki.",
+    "fix_sw": "Ongeza rekodi ya DMARC TXT kwenye _dmarc.kikoa-chako.com: v=DMARC1; p=quarantine; rua=mailto:wewe@kikoa-chako.com"
+  },
+  "no-caa": {
+    "severity": "low",
+    "title_en": "Any Certificate Authority Can Issue Your SSL Certificate",
+    "impact_en": "Without a CAA record, any of the hundreds of certificate authorities worldwide could issue a certificate for your domain, which could enable impersonation.",
+    "fix_en": "Add a CAA DNS record specifying which authorities may issue certificates for your domain. Example: 0 issue \"letsencrypt.org\"",
+    "title_sw": "Mamlaka Yoyote ya Cheti Inaweza Kutoa Cheti Chako cha SSL",
+    "impact_sw": "Bila rekodi ya CAA, mamlaka yoyote ya cheti duniani inaweza kutoa cheti kwa kikoa chako, ambayo inaweza kuruhusu udanganyifu.",
+    "fix_sw": "Ongeza rekodi ya CAA ya DNS inayobainisha ni mamlaka zipi zinaruhusiwa kutoa vyeti kwa kikoa chako. Mfano: 0 issue \"letsencrypt.org\""
+  }
+}
