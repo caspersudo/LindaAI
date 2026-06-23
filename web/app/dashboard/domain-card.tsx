@@ -57,6 +57,7 @@ export default function DomainCard({ domain }: { domain: Domain }) {
   const [scanning, setScanning] = useState(false);
   const [activeScanId, setActiveScanId] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<"en" | "sw" | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
 
   // Poll while a scan is queued or running
   useEffect(() => {
@@ -125,21 +126,27 @@ export default function DomainCard({ domain }: { domain: Domain }) {
   async function downloadReport(lang: "en" | "sw") {
     if (!scan?.id) return;
     setDownloading(lang);
+    setReportError(null);
     try {
       const token = await getToken();
       const r = await fetch(`${API_URL}/scans/${scan.id}/report?lang=${lang}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!r.ok) throw new Error(await r.text());
+      if (!r.ok) {
+        const text = await r.text();
+        throw new Error(text || `HTTP ${r.status}`);
+      }
       const blob = await r.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `lindaai-${domain.hostname}-${lang}.pdf`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      // silent — user will see no download
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+    } catch (e: unknown) {
+      setReportError(e instanceof Error ? e.message : "Report generation failed");
     }
     setDownloading(null);
   }
@@ -236,6 +243,9 @@ export default function DomainCard({ domain }: { domain: Domain }) {
               Run again
             </button>
           </div>
+          {reportError && (
+            <p className="domain-note msg--error">{reportError}</p>
+          )}
         </>
       )}
     </div>
