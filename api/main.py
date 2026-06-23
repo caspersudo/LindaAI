@@ -7,6 +7,7 @@ Routes:
   GET  /scans/{scan_id}             → poll status + findings
 """
 import asyncio
+import base64
 import io
 import os
 import ssl
@@ -15,7 +16,7 @@ from datetime import datetime, timezone
 
 import dns.asyncresolver
 import httpx
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -31,6 +32,15 @@ SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
 
 _origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
 allowed_origins = [o.strip() for o in _origins.split(",") if o.strip()]
+
+# ── Daraja / M-Pesa ───────────────────────────────────────────────────────────
+DARAJA_KEY      = os.getenv("DARAJA_CONSUMER_KEY", "")
+DARAJA_SECRET   = os.getenv("DARAJA_CONSUMER_SECRET", "")
+DARAJA_CODE     = os.getenv("DARAJA_SHORTCODE", "174379")   # sandbox default
+DARAJA_PASSKEY  = os.getenv("DARAJA_PASSKEY", "")
+DARAJA_BASE     = os.getenv("DARAJA_BASE", "https://sandbox.safaricom.co.ke")
+API_BASE_URL    = os.getenv("API_BASE_URL", "https://lindaai-api.onrender.com")
+REPORT_PRICE_KES = int(os.getenv("REPORT_PRICE_KES", "500"))
 
 app = FastAPI(
     title="LindaAI API",
@@ -107,6 +117,54 @@ async def get_org_id(user: dict) -> str:
     if not rows:
         raise HTTPException(403, "User profile not found")
     return rows[0]["org_id"]
+
+
+# ─── Daraja helpers ───────────────────────────────────────────────────────────
+
+def _norm_phone(raw: str) -> str:
+    """Normalise a Kenya number to 2547XXXXXXXX (12 digits, no +)."""
+    digits = "".join(c for c in raw if c.isdigit())
+    if digits.startswith("0") and len(digits) == 10:
+        digits = "254" + digits[1:]
+    if not (digits.startswith("254") and len(digits) == 12):
+        raise ValueError("Enter a valid Kenyan number e.g. 0712 345 678")
+    return digits
+
+
+async def _daraja_token() -> str:
+    async with httpx.AsyncClient(timeout=10) as c:
+        r = await c.get(
+            f"{DARAJA_BASE}/oauth/v1/generate?grant_type=client_credentials",
+            auth=(DARAJA_KEY, DARAJA_SECRET),
+        )
+    r.raise_for_status()
+    return r.json()["access_token"]
+
+
+async def _stk_push(phone: str, amount: int, scan_id: str) -> dict:
+    token = await _daraja_token()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    pw = base64.b64encode(f"{DARAJA_CODE}{DARAJA_PASSKEY}{ts}".encode()).decode()
+    async with httpx.AsyncClient(timeout=15) as c:
+        r = await c.post(
+            f"{DARAJA_BASE}/mpesa/stkpush/v1/processrequest",
+            json={
+                "BusinessShortCode": DARAJA_CODE,
+                "Password": pw,
+                "Timestamp": ts,
+                "TransactionType": "CustomerPayBillOnline",
+                "Amount": amount,
+                "PartyA": phone,
+                "PartyB": DARAJA_CODE,
+                "PhoneNumber": phone,
+                "CallBackURL": f"{API_BASE_URL}/payments/callback",
+                "AccountReference": f"LindaAI-{scan_id[:8]}",
+                "TransactionDesc": "LindaAI Security Report",
+            },
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    r.raise_for_status()
+    return r.json()
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
@@ -213,6 +271,111 @@ async def get_scan(scan_id: str, user: dict = Depends(current_user)):
     return rows[0]
 
 
+# ── Payments ───────────────────────────────────────────────────────────────────
+
+class PaymentCreate(BaseModel):
+    scan_id: str
+    phone: str
+
+
+@app.post("/payments", status_code=202)
+async def initiate_payment(body: PaymentCreate, user: dict = Depends(current_user)):
+    org_id = await get_org_id(user)
+
+    rows = await db_get(
+        "scans",
+        {"id": f"eq.{body.scan_id}", "org_id": f"eq.{org_id}", "select": "id,status"},
+    )
+    if not rows:
+        raise HTTPException(404, "Scan not found")
+    if rows[0]["status"] != "complete":
+        raise HTTPException(409, "Scan is not complete yet")
+
+    try:
+        phone = _norm_phone(body.phone)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+    payment = await db_insert("payments", {
+        "scan_id": body.scan_id,
+        "org_id": org_id,
+        "amount_kes": REPORT_PRICE_KES,
+        "status": "initiated",
+        "phone_e164": phone,
+    })
+
+    if not DARAJA_KEY:
+        # Daraja not configured — return sandbox stub so UI can still be tested
+        return {"payment_id": payment["id"], "status": "initiated", "sandbox": True}
+
+    try:
+        resp = await _stk_push(phone, REPORT_PRICE_KES, body.scan_id)
+        await db_patch("payments", {"id": payment["id"]}, {
+            "merchant_request_id": resp.get("MerchantRequestID"),
+            "checkout_request_id": resp.get("CheckoutRequestID"),
+        })
+    except Exception as e:
+        await db_patch("payments", {"id": payment["id"]}, {"status": "failed"})
+        raise HTTPException(502, f"M-Pesa push failed: {e}")
+
+    return {
+        "payment_id": payment["id"],
+        "status": "initiated",
+        "message": "Check your phone for the M-Pesa prompt",
+    }
+
+
+@app.post("/payments/callback")
+async def payment_callback(request: Request):
+    """Daraja STK-push callback — called by Safaricom, no user auth."""
+    try:
+        data = await request.json()
+    except Exception:
+        return {"ResultCode": 0, "ResultDesc": "Accepted"}
+
+    stk = data.get("Body", {}).get("stkCallback", {})
+    checkout_id = stk.get("CheckoutRequestID")
+    result_code = stk.get("ResultCode")
+
+    if not checkout_id:
+        return {"ResultCode": 0, "ResultDesc": "Accepted"}
+
+    rows = await db_get(
+        "payments",
+        {"checkout_request_id": f"eq.{checkout_id}", "select": "id"},
+    )
+    if not rows:
+        return {"ResultCode": 0, "ResultDesc": "Accepted"}
+
+    payment_id = rows[0]["id"]
+
+    if result_code == 0:
+        items = stk.get("CallbackMetadata", {}).get("Item", [])
+        meta = {item["Name"]: item.get("Value") for item in items}
+        await db_patch("payments", {"id": payment_id}, {
+            "status": "paid",
+            "mpesa_receipt": str(meta.get("MpesaReceiptNumber", "")),
+            "paid_at": datetime.now(timezone.utc).isoformat(),
+        })
+    else:
+        await db_patch("payments", {"id": payment_id}, {"status": "failed"})
+
+    return {"ResultCode": 0, "ResultDesc": "Accepted"}
+
+
+@app.get("/payments/{payment_id}")
+async def get_payment(payment_id: str, user: dict = Depends(current_user)):
+    org_id = await get_org_id(user)
+    rows = await db_get(
+        "payments",
+        {"id": f"eq.{payment_id}", "org_id": f"eq.{org_id}",
+         "select": "id,status,amount_kes,mpesa_receipt"},
+    )
+    if not rows:
+        raise HTTPException(404, "Payment not found")
+    return rows[0]
+
+
 @app.get("/scans/{scan_id}/report")
 async def download_report(
     scan_id: str,
@@ -233,6 +396,22 @@ async def download_report(
 
     if scan["status"] != "complete":
         raise HTTPException(409, "Scan is not complete yet")
+
+    # ── Paywall: first completed scan per domain is free; rest need payment ──
+    if DARAJA_KEY:
+        domain_scans = await db_get(
+            "scans",
+            {"domain_id": f"eq.{scan['domain_id']}", "status": "eq.complete",
+             "select": "id", "order": "created_at.asc"},
+        )
+        is_first = bool(domain_scans) and domain_scans[0]["id"] == scan_id
+        if not is_first:
+            paid = await db_get(
+                "payments",
+                {"scan_id": f"eq.{scan_id}", "status": "eq.paid", "select": "id"},
+            )
+            if not paid:
+                raise HTTPException(402, "Report requires payment")
 
     findings = scan.get("raw_findings") or []
 
