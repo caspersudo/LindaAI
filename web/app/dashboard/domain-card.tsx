@@ -218,6 +218,20 @@ export default function DomainCard({ domain }: { domain: Domain }) {
             ))}
           </div>
           <div className="card-actions">
+            <button
+              className="btn btn--primary btn--sm"
+              onClick={() => downloadReport("en")}
+              disabled={downloading !== null}
+            >
+              {downloading === "en" ? "Generating…" : "Report (EN)"}
+            </button>
+            <button
+              className="btn btn--primary btn--sm"
+              onClick={() => downloadReport("sw")}
+              disabled={downloading !== null}
+            >
+              {downloading === "sw" ? "Generating…" : "Report (SW)"}
+            </button>
             <button className="btn btn--ghost btn--sm" onClick={handleScan} disabled={scanning}>
               Run again
             </button>
