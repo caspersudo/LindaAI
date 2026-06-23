@@ -129,6 +129,8 @@ export default function DomainCard({ domain }: { domain: Domain }) {
     setReportError(null);
     try {
       const token = await getToken();
+      // Ping healthz first — wakes the Render service if it's sleeping (free tier)
+      await fetch(`${API_URL}/healthz`).catch(() => {});
       const r = await fetch(`${API_URL}/scans/${scan.id}/report?lang=${lang}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
