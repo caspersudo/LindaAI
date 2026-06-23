@@ -233,7 +233,7 @@ def generate_pdf(
             pdf.set_text_color(*SEV_RGB[sev])
             pdf.cell(8, 5, "[ ]")
             pdf.set_text_color(*SLATE)
-            pdf.multi_cell(0, 5, title)
+            pdf.multi_cell(pdf.epw - 8, 5, title)
 
     pdf.ln(5)
     pdf.set_font("Helvetica", "I", 8)
