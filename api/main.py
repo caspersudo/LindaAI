@@ -248,12 +248,15 @@ async def download_report(
     # Cost tracking: GPT-4o-mini @ $0.15/M in, $0.60/M out → KES at ~130/$
     cost_kes = ((prompt_tokens * 0.00000015) + (completion_tokens * 0.0000006)) * 130
 
-    await db_patch("scans", {"id": scan_id}, {
-        "llm_prompt_tokens": prompt_tokens,
-        "llm_completion_tokens": completion_tokens,
-        "cost_kes": round(cost_kes, 4),
-        "overall_risk": summary.overall_risk,
-    })
+    try:
+        await db_patch("scans", {"id": scan_id}, {
+            "llm_prompt_tokens": prompt_tokens,
+            "llm_completion_tokens": completion_tokens,
+            "cost_kes": round(cost_kes, 4),
+            "overall_risk": summary.overall_risk,
+        })
+    except Exception:
+        pass  # cost telemetry is non-critical; don't block PDF delivery
 
     pdf_bytes = generate_pdf(hostname, findings, summary, lang)
     filename = f"lindaai-{hostname}-{lang}.pdf"
